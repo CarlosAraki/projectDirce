@@ -16,7 +16,8 @@ services:
       - ./local-files:/files
     depends_on:
       - nodeApi
-
+    networks:
+      - minha-rede
 
   ollama:  # New service for running the Dockerfile in /ollama
     image: ollama/ollama:latest
@@ -28,7 +29,9 @@ services:
       - ./model_files:/model_files  # Mount the directory with the trained model
     tty: true
     entrypoint: ["sh", "-c", "apt-get update && apt-get install -y curl && /model_files/run_ollama.sh"]
-
+    networks:
+      - minha-rede
+      
   nodeApi:
     build:                      # Correto - bloco 'build:' necessário
       context: ./backendTuya    # Agora sim dentro de 'build:'
@@ -37,10 +40,12 @@ services:
     restart: always
     ports:
       - "3001:3001"
+    networks:
+      - minha-rede
      
 volumes:
   n8n_data:
 
 networks:
-  app-network:
+  minha-rede:
     driver: bridge
