@@ -87,7 +87,7 @@ async function checkForPanic(statusArray) {
   if (masterMode) {
     console.log(`Modo encontrado: ${masterMode.value}`);
     
-    if (masterMode.value === 'sos' || masterMode.value === 'alarm') { // Altere para 'disarmed' se necessário
+    if (masterMode.value === 'arm' || masterMode.value === 'sos' || masterMode.value === 'alarm') { // Altere para 'disarmed' se necessário
       console.log('MODE_ATIVO! - ALARME ARMADO');
       return true;
     } else {
