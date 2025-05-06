@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRTC to PSTN</title>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sip.js@0.20.0/dist/sip.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        #call-controls { margin-top: 20px; }
+        #status { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>WebRTC to PSTN Call</h1>
+    
+    <div>
+        <label for="number">Phone Number:</label>
+        <input type="text" id="number" placeholder="e.g. 5511999999999">
+    </div>
+    
+    <div id="call-controls">
+        <button id="call">Call</button>
+        <button id="hangup" disabled>Hang Up</button>
+    </div>
+    
+    <div id="status">Ready</div>
+    
+    <audio id="remoteAudio" autoplay></audio>
+    
+    <script>
+        const config = {
+            uri: 'sip:seu_usuario@asterisk',
+            ws_servers: 'ws://' + window.location.hostname + ':8088/ws',
+            authorization_user: 'seu_usuario',
+            password: 'sua_senha',
+            ice_servers: [{ urls: 'stun:stun.l.google.com:19302' }],
+            hack_ip_in_contact: true,
+            session_timers: false
+        };
+
+        const ua = new SIP.UA(config);
+        let currentSession = null;
+
+        document.getElementById('call').addEventListener('click', () => {
+            const number = document.getElementById('number').value;
+            if (!number) return;
+            
+            document.getElementById('status').textContent = 'Calling...';
+            document.getElementById('call').disabled = true;
+            document.getElementById('hangup').disabled = false;
+            
+            currentSession = ua.call(`sip:${number}@voipms`, {
+                mediaConstraints: { audio: true, video: false },
+                rtcConstraints: { iceTransportPolicy: 'all' }
+            });
+            
+            currentSession.on('accepted', () => {
+                document.getElementById('status').textContent = 'Call in progress';
+            });
+            
+            currentSession.on('ended', () => {
+                document.getElementById('status').textContent = 'Call ended';
+                document.getElementById('call').disabled = false;
+                document.getElementById('hangup').disabled = true;
+                currentSession = null;
+            });
+        });
+        
+        document.getElementById('hangup').addEventListener('click', () => {
+            if (currentSession) {
+                currentSession.bye();
+            }
+        });
+    </script>
+</body>
+</html>

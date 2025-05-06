@@ -1,0 +1,46 @@
+services:
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_PORT=5678
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://host.docker.internal/
+      - N8N_SECURE_COOKIE=false
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./local-files:/files
+    depends_on:
+      - nodeApi
+
+
+  ollama:  # New service for running the Dockerfile in /ollama
+    image: ollama/ollama:latest
+    pull_policy: always
+    container_name: ollama
+    ports:    
+      - "11434:11434"
+    volumes:
+      - ./model_files:/model_files  # Mount the directory with the trained model
+    tty: true
+    entrypoint: ["sh", "-c", "apt-get update && apt-get install -y curl && /model_files/run_ollama.sh"]
+
+  nodeApi:
+    build:                      # Correto - bloco 'build:' necessário
+      context: ./backendTuya    # Agora sim dentro de 'build:'
+      dockerfile: Dockerfile    # Agora sim dentro de 'build:'
+    image: nodeapi  # Nome em minúsculas
+    restart: always
+    ports:
+      - "3001:3001"
+     
+volumes:
+  n8n_data:
+
+networks:
+  app-network:
+    driver: bridge
