@@ -7,3 +7,4 @@
 *.pem
 *cred
 *outputTwillio.json
+*json
