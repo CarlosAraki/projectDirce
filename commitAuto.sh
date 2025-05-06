@@ -17,3 +17,4 @@ fi
 
 # Mostra o status após o commit
 git status
+git push
